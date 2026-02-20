@@ -1,0 +1,68 @@
+[
+    {
+        "batch_id": "20260220_101846",
+        "id": "blackrock-usd-institutional-digital-liquidity-fund",
+        "symbol": "buidl",
+        "name": "BlackRock USD Institutional Digital Liquidity Fund",
+        "price": 1.0,
+        "market_cap": 1940358519,
+        "total_volume": 0.0,
+        "last_updated": "2026-02-20T03:10:05.825Z",
+        "reason": "Invalid asset: Zero price or volume detected"
+    },
+    {
+        "batch_id": "20260220_101846",
+        "id": "superstate-short-duration-us-government-securities-fund-ustb",
+        "symbol": "ustb",
+        "name": "Superstate Short Duration U.S. Government Securities Fund (USTB)",
+        "price": 11.0,
+        "market_cap": 1247246535,
+        "total_volume": 0.0,
+        "last_updated": "2026-02-20T03:15:07.095Z",
+        "reason": "Invalid asset: Zero price or volume detected"
+    },
+    {
+        "batch_id": "20260220_101846",
+        "id": "eutbl",
+        "symbol": "eutbl",
+        "name": "Spiko EU T-Bills Money Market Fund",
+        "price": 1.23,
+        "market_cap": 768733547,
+        "total_volume": 0.0,
+        "last_updated": "2026-02-20T03:15:09.389Z",
+        "reason": "Invalid asset: Zero price or volume detected"
+    },
+    {
+        "batch_id": "20260220_101846",
+        "id": "janus-henderson-anemoy-aaa-clo-fund",
+        "symbol": "jaaa",
+        "name": "Janus Henderson Anemoy AAA CLO Fund",
+        "price": 1.027,
+        "market_cap": 722448966,
+        "total_volume": 0.0,
+        "last_updated": "2026-02-20T03:15:07.076Z",
+        "reason": "Invalid asset: Zero price or volume detected"
+    },
+    {
+        "batch_id": "20260220_101846",
+        "id": "ousg",
+        "symbol": "ousg",
+        "name": "OUSG",
+        "price": 114.35,
+        "market_cap": 710199910,
+        "total_volume": 0.0,
+        "last_updated": "2026-02-20T03:10:05.728Z",
+        "reason": "Invalid asset: Zero price or volume detected"
+    },
+    {
+        "batch_id": "20260220_101846",
+        "id": "janus-henderson-anemoy-treasury-fund",
+        "symbol": "jtrsy",
+        "name": "Janus Henderson Anemoy Treasury Fund",
+        "price": 1.095,
+        "market_cap": 567508974,
+        "total_volume": 0.0,
+        "last_updated": "2026-02-20T03:15:03.195Z",
+        "reason": "Invalid asset: Zero price or volume detected"
+    }
+]

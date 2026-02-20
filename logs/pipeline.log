@@ -1,0 +1,12 @@
+2026-02-20 10:18:44,438 - cryptoPipeline = INFO - --- Initiating Cryptocurrency ETL Pipeline ---
+2026-02-20 10:18:44,440 - cryptoPipeline = INFO - Fetching market data from CoinGecko (Currency: usd)...
+2026-02-20 10:18:45,982 - cryptoPipeline = INFO - Successfully fetched market data from API.
+2026-02-20 10:18:45,996 - cryptoPipeline = INFO - Initializing SQLite staging at: data/crypto_v2.db
+2026-02-20 10:18:46,039 - cryptoPipeline = INFO - Successfully loaded 100 records to Staging (Batch: 20260220_101846)
+2026-02-20 10:18:46,043 - cryptoPipeline = INFO - Extracting raw data for processing (Batch: 20260220_101846)
+2026-02-20 10:18:46,056 - cryptoPipeline = INFO - Data Quality Report generated: data/issues\issues_20260220_101846.json
+2026-02-20 10:18:46,059 - cryptoPipeline = INFO - Transformation complete: 94 valid, 6 rejected.
+2026-02-20 10:18:46,060 - cryptoPipeline = INFO - Executing Data Quality (DQ) checks for 94 records...
+2026-02-20 10:18:46,061 - cryptoPipeline = INFO - Data Quality Status: PASSED (All records healthy)
+2026-02-20 10:18:46,094 - cryptoPipeline = INFO - DATABASE LOAD SUCCESS: 94 records archived in Fact Table.
+2026-02-20 10:18:46,114 - cryptoPipeline = INFO - --- Pipeline Execution Completed Successfully ---
