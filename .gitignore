@@ -15,3 +15,12 @@ logs/*.logs
 #IDE
 .vscode/
 .idea/
+
+# Airflow temporary files
+*.pid
+*.lock
+logs/
+data/
+airflow.cfg
+webserver_config.py
+*.pid
