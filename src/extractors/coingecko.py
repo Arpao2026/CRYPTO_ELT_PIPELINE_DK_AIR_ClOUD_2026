@@ -6,69 +6,60 @@ from src.utils.logger import logger
 
 class CoingeckoClient:
     """
-    Client for interacting with the CoinGecko API.
-    Handles data extraction with built-in resilience and retry logic.
+    คลาสสำหรับเชื่อมต่อกับ CoinGecko API 
+    ออกแบบมาให้มีระบบ Resilience (ความทนทาน) เพื่อรับมือกับปัญหา Network หรือ API Rate Limit
     """
     
     def __init__(self):
-        # Base URL for CoinGecko API v3
+        # กำหนดที่อยู่หลักของ API (Base URL)
         self.base_url = 'https://api.coingecko.com/api/v3'
         
-        # Authentication and configuration headers
+        # ตั้งค่า Header สำหรับการส่งคำขอข้อมูล
         self.headers = {
-            'accept': 'application/json',
-            'x-cg-demo-api-key': settings.COINGECKO_API_KEY
+            'accept': 'application/json',                     # บอก API ว่าเราต้องการข้อมูลเป็นรูปแบบ JSON
+            'x-cg-demo-api-key': settings.COINGECKO_API_KEY   # ยืนยันตัวตนด้วย API Key จากไฟล์ settings
         }
 
+    # ระบบ Retry Logic: ถ้าดึงข้อมูลไม่สำเร็จ โปรแกรมจะพยายามใหม่เองอัตโนมัติ
     @retry(
-        # Stops retrying after a pre-configured number of attempts in settings
-        stop=stop_after_attempt(settings.RETRY_COUNT),
-        # Implements Exponential Backoff (waits 4s, 8s, etc.) to respect API rate limits
-        wait=wait_exponential(multiplier=1, min=4, max=10),
-        # Only retries on Network-related errors (e.g., Connection Timeout, 5xx errors)
-        retry=retry_if_exception_type(requests.exceptions.RequestException),
-        # Ensures the final exception is raised if all retry attempts fail
-        reraise=True
+        stop=stop_after_attempt(settings.RETRY_COUNT),               # หยุดพยายามเมื่อครบจำนวนครั้งที่ตั้งค่าไว้
+        wait=wait_exponential(multiplier=1, min=4, max=10),          # ใช้กลยุทธ์ Exponential Backoff เพื่อเลี่ยงการโดนแบน
+        retry=retry_if_exception_type(requests.exceptions.RequestException), # ลองใหม่เฉพาะเมื่อเกิดปัญหาที่ตัว Network
+        reraise=True                                                 # ส่ง Error ออกไปหากลองจนครบกำหนดแล้วยังพังอยู่
     )
     def get_coin_market(self, vs_currency: str = 'usd') -> List[Dict[str, Any]]:
         """
-        Fetches current market data for cryptocurrencies.
-        
-        Args:
-            vs_currency (str): The target currency to compare prices against. Defaults to 'usd'.
-            
-        Returns:
-            List[Dict[str, Any]]: A list of cryptocurrency market data objects.
-            Returns an empty list if an exception occurs after exhausting retries.
+        ฟังก์ชันดึงข้อมูลราคาตลาด (Market Data) 
         """
         try:
-            logger.info(f'Fetching market data from CoinGecko (Currency: {vs_currency})...')
+            # แจ้งสถานะการเริ่มดึงข้อมูล 
+            logger.info(f'Initiating data extraction from CoinGecko (Currency: {vs_currency})...')
 
             endpoint = f'{self.base_url}/coins/markets'
             
-            # API Query Parameters
+            # กำหนดเงื่อนไขการดึงข้อมูล (Query Parameters)
             params = {
                 'vs_currency': vs_currency,
-                'order': 'market_cap_desc',     # Rank by Market Capitalization
-                'per_page': settings.BATCH_SIZE, # Records per page
-                'page': 1                       # Page number
+                'order': 'market_cap_desc',      # เรียงลำดับตามมูลค่าตลาด
+                'per_page': settings.BATCH_SIZE, # จำนวนข้อมูลต่อหน้า (คุมปริมาณ Data)
+                'page': 1                        # หน้าที่ต้องการดึง
             }
 
-            # Execute HTTP GET request
+            # ส่งคำขอ HTTP GET
             response = requests.get(
                 endpoint,
                 headers=self.headers,
                 params=params,
-                timeout=settings.API_TIMEOUT # Prevents the script from hanging on slow responses
+                timeout=settings.API_TIMEOUT # กำหนดเวลา Timeout ป้องกันโปรแกรมค้าง
             )
 
-            # Raise an HTTPError if the response status is 4xx or 5xx
+            # ตรวจสอบ HTTP Status: ถ้าพังจะโดดไปที่ส่วน Exception ทันที
             response.raise_for_status()
 
             logger.info('Successfully fetched market data from API.')
             return response.json()
 
         except Exception as e:
-            # Logs the error and returns an empty list to prevent pipeline failure
+            # บันทึก Error หากกระบวนการดึงข้อมูลล้มเหลว
             logger.error(f'Critical error in data extraction: {str(e)}')
             return []

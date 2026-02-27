@@ -1,18 +1,21 @@
 version: '3.8'
 
+# 1. ส่วนกำหนดค่ากลาง (Common Configuration) 
+# ใช้ระบบ YAML Anchors (&) เพื่อแชร์ค่าเริ่มต้นให้ทุก Service โดยไม่ต้องเขียนซ้ำ
 x-airflow-common: &airflow-common
   image: apache/airflow:2.7.1
   environment:
     &airflow-common-env
-    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor # ใช้ Executor แบบโลคอลเพื่อรันงานในเครื่องเดียว
     AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
     AIRFLOW__CORE__FERNET_KEY: ''
-    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'  # ปิดการโหลด DAG ตัวอย่างเพื่อให้หน้าจอสะอาด
     AIRFLOW__CORE__LOGGING_LEVEL: INFO
-    # รวม Library ที่ต้องใช้ (ใส่ครั้งเดียวจบ)
+    # รวม Library ที่ต้องใช้: ระบบจะติดตั้งแพ็คเกจเหล่านี้ให้อัตโนมัติเมื่อเริ่มระบบ (Container Startup)
     _PIP_ADDITIONAL_REQUIREMENTS: "requests tenacity psycopg2-binary pydantic-settings"
     PYTHONPATH: "/opt/airflow"
   volumes:
+    # การทำ Bind Mount: เชื่อมโฟลเดอร์ในเครื่องเราเข้ากับใน Container เพื่อให้แก้โค้ดแล้วอัปเดตทันที
     - .:/opt/airflow
     - ./dags:/opt/airflow/dags
     - ./logs:/opt/airflow/logs
@@ -20,9 +23,10 @@ x-airflow-common: &airflow-common
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     postgres:
-      condition: service_healthy
+      condition: service_healthy # รอให้ฐานข้อมูล Postgres พร้อมใช้งานจริงก่อนเริ่ม Airflow
 
 services:
+  # 2. Database Service: หัวใจหลักในการเก็บสถานะของ Airflow (Metadata Database)
   postgres:
     image: postgres:13
     environment:
@@ -30,34 +34,40 @@ services:
       POSTGRES_PASSWORD: airflow
       POSTGRES_DB: airflow
     volumes:
-      - postgres_db_data:/var/lib/postgresql/data # <--- หัวใจสำคัญ: ข้อมูลจะไม่หายเมื่อปิดเครื่อง
+      # หัวใจสำคัญ (Persistence): กำหนดให้ข้อมูลในฐานข้อมูลถูกเก็บไว้ใน Volume ถาวร ข้อมูลจะไม่หายเมื่อสั่ง Stop
+      - postgres_db_data:/var/lib/postgresql/data 
     healthcheck:
+      # ตรวจสอบว่าฐานข้อมูลพร้อมรับการเชื่อมต่อจริงๆ หรือไม่
       test: ["CMD-SHELL", "pg_isready -U airflow"]
       interval: 10s
       timeout: 5s
       retries: 5
 
+  # 3. Initialization Service: ทำหน้าที่เตรียมความพร้อมระบบ (เช่น สร้าง User, Migrate DB)
   airflow-init:
     <<: *airflow-common
     command: version
     environment:
       <<: *airflow-common-env
       _AIRFLOW_DB_UPGRADE: 'true'
-      _AIRFLOW_WWW_USER_CREATE: 'true'
+      _AIRFLOW_WWW_USER_CREATE: 'true' # สร้าง Admin User ให้อัตโนมัติสำหรับการเข้าเว็บครั้งแรก
       _AIRFLOW_WWW_USER_USERNAME: airflow
       _AIRFLOW_WWW_USER_PASSWORD: airflow
 
+  # 4. Webserver Service: ส่วนการแสดงผล GUI สำหรับมอนิเตอร์และสั่งรันงาน (พอร์ต 8080)
   airflow-webserver:
     <<: *airflow-common
     command: webserver
     ports:
       - "8080:8080"
-    restart: always # <--- ถ้าพัง ให้มันปลุกตัวเองขึ้นมาใหม่
+    restart: always # กลไก Resilience: ถ้า Service พัง ให้ Docker ปลุกมันขึ้นมาใหม่เองอัตโนมัติ
 
+  # 5. Scheduler Service: ส่วนที่เป็นหัวใจในการสั่งงาน (Job Scheduling) และรันงานตามเวลาที่กำหนด
   airflow-scheduler:
     <<: *airflow-common
     command: scheduler
     restart: always
 
+# 5. Persistent Volumes: นิยามพื้นที่เก็บข้อมูลถาวรนอกระบบ Container
 volumes:
-  postgres_db_data: # สร้างพื้นที่เก็บข้อมูลถาวรในเครื่องคุณ
+  postgres_db_data: # สร้างพื้นที่เก็บข้อมูล (Volume) เพื่อรักษาข้อมูลในฐานข้อมูลให้คงอยู่ตลอดไป
