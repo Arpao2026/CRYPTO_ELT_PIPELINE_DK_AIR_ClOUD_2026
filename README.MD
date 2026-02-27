@@ -43,9 +43,9 @@ This project is my hands-on experience learning the ropes of **Data Engineering*
 ---
 
 ## 🧪 What I Learned (So Far)
-* **Troubleshooting:** Learning how to fix Airflow schedule issues and database locks was a huge part of this journey.
-* **SQL Skills:** Gained hands-on experience managing data using SQL commands like `SELECT`, `DELETE`, and `COUNT`.
-* **System Monitoring:** Learned to use the Airflow UI to track the health of my "Data Pipes" via phone and computer.
+* **Building a Full Pipeline:** I learned how to build a data pipeline from start to finish—getting data from an API, cleaning it, and storing it in a database so it’s ready to use.
+* **Working with Docker:** I learned how to use Docker to keep everything organized. It helps the project run the same way on my computer and on the cloud without any environment issues.
+* **Getting Started with Cloud (GCP):** I got hands-on experience putting my project on Google Cloud (GCE). It taught me the basics of how to set up and manage a live system on the cloud
 
 ---
 
