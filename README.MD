@@ -1,4 +1,4 @@
-# 🚀 My Crypto ELT Journey (Learning Project)
+# 🚀 Crypto Market ELT Pipeline(Learning Project)
 
 ## 📝 Project Overview
 This project is my hands-on experience learning the ropes of **Data Engineering**. I built an automated end-to-end pipeline that fetches cryptocurrency market data, processes it, and stores it in a structured format for analysis.
